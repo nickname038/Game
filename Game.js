@@ -30,6 +30,8 @@ const flat = new Image();
 const bonus = new Image();
 const zombiAlc = new Image();
 const bomb = new Image();
+const zombMam = new Image();
+const zombChild = new Image();
 
 const zombies = [];
 const bullets = [];
@@ -45,6 +47,8 @@ flat.src = 'Image/k-18.jpg';
 bonus.src = 'Image/bonus.jpg';
 zombiAlc.src = 'Image/zombiAlc.png';
 bomb.src = 'Image/bomb.png';
+zombMam.src = 'Image/mama.png';
+zombChild.src = 'Image/child.png'
 
 let score = 0;
 let bonusCounter = 0;
@@ -57,6 +61,10 @@ let leftPressed = false;
 const speedPlayer = 6;
 const speedZombi = 2;
 const speedBullet = 9;
+const speedAngryZombi = 5;
+
+const timeAttak = 4000;
+const angTimeAttak = 2000;
 
 const gun = {
   ones: bullets,
@@ -82,11 +90,13 @@ class Inficed {
     //this.eggY = RandomInteger(0, canvas.height);
     this.hasEgg = false;
     this.hasBonus = RandomInteger(0, 1000) > 500
+    this.speed = speedZombi;
+    this.timeAttak = timeAttak;
   }
 
   Update() {
     if (this.y < maxY) {
-      this.y += speedZombi;
+      this.y += this.speed;
     }
 
     if ((this.y > canvas.height - this.image.height * 0.4) &&
@@ -106,6 +116,42 @@ class Alcoholic extends Inficed {
     this.image = zombiAlc;
   }
 
+}
+
+class Children extends Inficed {
+  constructor(x, y, mam) {
+    super(x, y);
+    this.image = zombChild;
+    this.mother = mam;
+    this.isAngry = false;
+  }
+  Update() {
+    super.Update();
+    if (!(this.mother.isDraw) && this.speed === speedZombi) {
+      this.isAngry = true;
+      this.speed = speedAngryZombi;
+    }
+    if (this.isAngry && this.timeAttak === timeAttak) {
+      this.timeAttak = angTimeAttak;
+    }
+  }
+}
+
+class Mather extends Inficed {
+  constructor(x, y) {
+    super(x, y);
+    this.image = zombMam;
+    this.child = null;
+  }
+
+  Update() {
+    if (this.child) {
+      super.Update();
+    } else {
+      this.child = new Children(this.x + zombMam.width * 0.4, this.y, this);
+      zombies.push(this.child);
+    }
+  }
 }
 
 class Bonus {
@@ -187,8 +233,8 @@ document.addEventListener('click', clickHandler, false);
 
 
 function zombiUpdate() {
-  if (RandomInteger(0, 10000) > 9900) {
-    zombies.push(addZombi());
+  if (RandomInteger(0, 10000) > 9950) {
+    zombies.push(...addZombi());
   }
 
   for (const zomb of zombies) {
@@ -210,13 +256,20 @@ function zombiUpdate() {
   }
 }
 
-function bulletUpdate() {
-  for (const bul of Player.weapon.ones) {
-
+function weaponUpdate() {
+  for (const bul of bullets) {
     if (bul.isDraw) {
       bul.Update();
       ctx.drawImage(bul.image, 0, 0, bul.image.width, bul.image.height,
         bul.x, bul.y, bul.image.width, bul.image.height);
+    }
+  }
+
+  for (const bomb of bombs) {
+    if (bomb.isDraw) {
+      bomb.Update();
+      ctx.drawImage(bomb.image, 0, 0, bomb.image.width, bomb.image.height,
+        bomb.x, bomb.y, bomb.image.width, bomb.image.height);
     }
   }
 }
@@ -231,12 +284,15 @@ function bonusUpdate() {
 }
 
 function addZombi() {
-  if (RandomInteger(0, 1000) > 500) {
-    return new Inficed(RandomInteger(30, canvas.width - zombi.width * 0.4),
-      RandomInteger(250, 400) * -1);
+  const numb = RandomInteger(0, 1000);
+  const zombX = RandomInteger(30, canvas.width - 2 * zombi.width * 0.4);
+  const zombY = RandomInteger(250, 400) * -1;
+  if (numb < 400) {
+    return [new Inficed(zombX, zombY)];
+  } else if (numb < 700) {
+    return [new Alcoholic(zombX, zombY)];
   } else {
-    return new Alcoholic(RandomInteger(30, canvas.width - zombi.width * 0.4),
-      RandomInteger(250, 400) * -1)
+    return [new Mather(zombX, zombY)];
   }
 }
 
@@ -262,7 +318,7 @@ function Draw() {
 
   bonusUpdate();
   zombiUpdate();
-  bulletUpdate();
+  weaponUpdate();
   eggUpdate();
 
 
@@ -337,7 +393,7 @@ function ZombiAttak(zomb, index) {
     } else {
       clearInterval(timer)
     }
-  }, 3000)
+  }, zomb.timeAttak)
 }
 
 function RandomInteger(min, max) {
@@ -391,20 +447,38 @@ function clickHandler() {
   }
 }
 
-function collisionDetection() {
-  for (const bul of Player.weapon.ones) {
+function collisionZombiWeapon(weapon) {
+  for (const bul of weapon) {
     for (const zomb of zombies) {
       if (bul.x > zomb.x && bul.x < zomb.x + zomb.image.width * 0.4 &&
         bul.y < zomb.y + zomb.image.height * 0.4 && bul.isDraw && zomb.isDraw) {
-        bul.isDraw = false;
-        zomb.isDraw = false;
-        score += 4;
-        if (zomb.hasBonus) {
-          bonuses.push(new Bonus(zomb.x, zomb.y));
+        if (weapon === bullets && zomb instanceof Alcoholic) {
+          continue;
+        } else if (zomb instanceof Children && zomb.mother.isDraw) {
+          bul.isDraw = false;
+          zomb.mother.isDraw = false;
+          score += 4;
+          if (zomb.mother.hasBonus) {
+            bonuses.push(new Bonus(zomb.x, zomb.y));
+          }
+        } else {
+          bul.isDraw = false;
+          zomb.isDraw = false;
+          score += 4;
+          if (zomb.hasBonus) {
+            bonuses.push(new Bonus(zomb.x, zomb.y));
+          }
         }
       }
     }
   }
+}
+
+
+function collisionDetection() {
+
+  collisionZombiWeapon(bullets);
+  collisionZombiWeapon(bombs);
 
   for (const egg of eggs) {
     if (egg.y > Player.y && egg.y < Player.y + Player.image.height * 0.5 &&
