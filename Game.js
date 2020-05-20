@@ -17,6 +17,16 @@ let sX, sY, k, dx, dy;
 let sXZ, sYZ, K, dxEgg, dyEgg;
 const speedEgg = 4;
 
+const level1 = {
+  zombi: 4,
+  zombiAlc: 3,
+  mother: 2,
+  zombiSh: 1,
+  done: false,
+};
+
+//const sum1 = 50;
+
 window.onmousemove = function(event) {
   x = event.pageX;
   y = event.pageY;
@@ -32,6 +42,7 @@ const zombiAlc = new Image();
 const bomb = new Image();
 const zombMam = new Image();
 const zombChild = new Image();
+const zombSH = new Image();
 
 const zombies = [];
 const bullets = [];
@@ -48,7 +59,8 @@ bonus.src = 'Image/bonus.jpg';
 zombiAlc.src = 'Image/zombiAlc.png';
 bomb.src = 'Image/bomb.png';
 zombMam.src = 'Image/mama.png';
-zombChild.src = 'Image/child.png'
+zombChild.src = 'Image/child.png';
+zombSH.src = 'Image/ZombiSH.png';
 
 let score = 0;
 let bonusCounter = 0;
@@ -99,11 +111,6 @@ class Inficed {
       this.y += this.speed;
     }
 
-    if ((this.y > canvas.height - this.image.height * 0.4) &&
-     this.isDraw === true) {
-      Stop();
-    }
-
     if (this.y >= maxY && this.hasEgg === false && this.isDraw === true) {
       this.hasEgg = true;
     }
@@ -151,6 +158,13 @@ class Mather extends Inficed {
       this.child = new Children(this.x + zombMam.width * 0.4, this.y, this);
       zombies.push(this.child);
     }
+  }
+}
+
+class ZombiSH extends Inficed {
+  constructor(x, y) {
+    super(x, y);
+    this.image = zombSH;
   }
 }
 
@@ -207,6 +221,7 @@ class Egg {
     this.dx = 0;
     this.dy = 0;
     this.isDraw = false;
+    //this.isDead = false;
   }
 
   Update() {
@@ -234,7 +249,10 @@ document.addEventListener('click', clickHandler, false);
 
 function zombiUpdate() {
   if (RandomInteger(0, 10000) > 9950) {
-    zombies.push(...addZombi());
+    const newZombi = addZombi();
+    if (newZombi) {
+      zombies.push(...newZombi);
+    }
   }
 
   for (const zomb of zombies) {
@@ -254,6 +272,13 @@ function zombiUpdate() {
         zomb.x, zomb.y, zomb.image.width * 0.4, zomb.image.height * 0.4)
     }
   }
+  if (level1.done && zombies.every(chekZombi)) {
+    Stop();
+  }
+}
+
+function chekZombi(zomb) {
+  return !(zomb.isDraw)
 }
 
 function weaponUpdate() {
@@ -284,15 +309,25 @@ function bonusUpdate() {
 }
 
 function addZombi() {
-  const numb = RandomInteger(0, 1000);
+  //const numb = RandomInteger(0, 1000);
   const zombX = RandomInteger(30, canvas.width - 2 * zombi.width * 0.4);
   const zombY = RandomInteger(250, 400) * -1;
-  if (numb < 400) {
+  if (level1.zombi) {
+    level1.zombi--;
     return [new Inficed(zombX, zombY)];
-  } else if (numb < 700) {
+  } else if (level1.zombiAlc) {
+    level1.zombiAlc--;
     return [new Alcoholic(zombX, zombY)];
-  } else {
+  } else if (level1.mother) {
+    level1.mother--;
     return [new Mather(zombX, zombY)];
+  } else if (level1.zombiSh) {
+    level1.zombiSh--;
+    return [new ZombiSH(zombX, zombY),
+      new ZombiSH(zombX + zombi.width * 0.4, zombY),
+      new ZombiSH(zombX + zombi.width * 0.4 / 2, zombY - zombi.height * 0.4)]
+  } else if (!level1.done) {
+    level1.done = true;
   }
 }
 
@@ -302,6 +337,9 @@ function eggUpdate() {
       egg.Update();
       ctx.drawImage(egg.image, 0, 0, egg.image.width, egg.image.height,
         egg.x, egg.y, egg.image.width, egg.image.height)
+      //return false;
+    //} else if (egg.isDead) {
+      //return true;
     }
   }
 }
@@ -314,12 +352,12 @@ function Draw() {
   collisionDetection();
 
   const deadZombi = false;
-  const deadEgg = false;
 
   bonusUpdate();
   zombiUpdate();
   weaponUpdate();
-  eggUpdate();
+  const deadEgg = eggUpdate();
+
 
 
   if (deadZombi) {
@@ -391,6 +429,7 @@ function ZombiAttak(zomb, index) {
       eggs[index].dx = dxEgg;
       eggs[index].dy = dyEgg;
     } else {
+      //eggs[index].isDead = true;
       clearInterval(timer)
     }
   }, zomb.timeAttak)
