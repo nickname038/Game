@@ -17,15 +17,6 @@ let sX, sY, k, dx, dy;
 let sXZ, sYZ, K, dxEgg, dyEgg;
 const speedEgg = 4;
 
-const level1 = {
-  zombi: 4,
-  zombiAlc: 3,
-  mother: 2,
-  zombiSh: 1,
-  done: false,
-};
-
-//const sum1 = 50;
 
 window.onmousemove = function(event) {
   x = event.pageX;
@@ -168,6 +159,17 @@ class ZombiSH extends Inficed {
   }
 }
 
+const level1 = [
+  { addNewZomb: (x, y) => [new Inficed(x, y)], number: 4 },
+  { addNewZomb: (x, y) => [new Alcoholic(x, y)], number: 3 },
+  { addNewZomb: (x, y) => [new Mather(x, y)], number: 2 },
+  { addNewZomb: (x, y) => [new ZombiSH(x, y),
+    new ZombiSH(x + zombi.width * 0.4, y),
+    new ZombiSH(x + zombi.width * 0.4 / 2, y - zombi.height * 0.4)],
+  number: 1 }];
+
+level1.count = 10;
+
 class Bonus {
   constructor(x, y) {
     this.image = bonus;
@@ -272,7 +274,7 @@ function zombiUpdate() {
         zomb.x, zomb.y, zomb.image.width * 0.4, zomb.image.height * 0.4)
     }
   }
-  if (level1.done && zombies.every(chekZombi)) {
+  if (!level1.count && zombies.every(chekZombi)) {
     Stop();
   }
 }
@@ -309,25 +311,15 @@ function bonusUpdate() {
 }
 
 function addZombi() {
-  //const numb = RandomInteger(0, 1000);
+  const numb = '' + RandomInteger(0, 3);
   const zombX = RandomInteger(30, canvas.width - 2 * zombi.width * 0.4);
   const zombY = RandomInteger(250, 400) * -1;
-  if (level1.zombi) {
-    level1.zombi--;
-    return [new Inficed(zombX, zombY)];
-  } else if (level1.zombiAlc) {
-    level1.zombiAlc--;
-    return [new Alcoholic(zombX, zombY)];
-  } else if (level1.mother) {
-    level1.mother--;
-    return [new Mather(zombX, zombY)];
-  } else if (level1.zombiSh) {
-    level1.zombiSh--;
-    return [new ZombiSH(zombX, zombY),
-      new ZombiSH(zombX + zombi.width * 0.4, zombY),
-      new ZombiSH(zombX + zombi.width * 0.4 / 2, zombY - zombi.height * 0.4)]
-  } else if (!level1.done) {
-    level1.done = true;
+  console.log(numb);
+  if (level1[numb].number) {
+    console.log('dddddddddddd');
+    level1[numb].number--
+    level1.count--;
+    return level1[numb].addNewZomb(zombX, zombY);
   }
 }
 
@@ -337,9 +329,6 @@ function eggUpdate() {
       egg.Update();
       ctx.drawImage(egg.image, 0, 0, egg.image.width, egg.image.height,
         egg.x, egg.y, egg.image.width, egg.image.height)
-      //return false;
-    //} else if (egg.isDead) {
-      //return true;
     }
   }
 }
@@ -431,6 +420,7 @@ function ZombiAttak(zomb, index) {
     } else {
       //eggs[index].isDead = true;
       clearInterval(timer)
+      zombies.shift();
     }
   }, zomb.timeAttak)
 }
