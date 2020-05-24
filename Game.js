@@ -54,8 +54,17 @@ zombChild.src = 'Image/child.png';
 zombSH.src = 'Image/ZombiSH.png';
 
 let score = 0;
-let bonusCounter = 0;
-const bulletRange = 20;
+
+const moneyCount = 500;
+const healthCount = 90;
+const healthVolume = 100;
+const maskCount = 3;
+const maskVolume = 5;
+const antisepticCount = 10;
+const antisepticVolume = 15;
+
+//let bonusCounter = 0;
+//const bulletRange = 20;
 const bombRange = 5;
 
 let rightPressed = false;
@@ -71,14 +80,14 @@ const angTimeAttak = 2000;
 
 const gun = {
   ones: bullets,
-  activeOnes: bulletRange,
-  maxCount: bulletRange,
+  activeOnes: antisepticCount,
+  maxCount: antisepticVolume,
 }
 
 const projector = {
   ones: bombs,
-  activeOnes: bombRange,
-  maxCount: bombRange,
+  activeOnes: maskCount,
+  maxCount: maskVolume,
 }
 
 const maxY = (canvas.height / 3);
@@ -180,12 +189,12 @@ class Bonus {
 }
 
 class Bullet {
-  constructor(x, y) {
+  constructor(x, y, isActive) {
     this.image = bullet;
     this.x = x;
     this.y = y;
     this.isDraw = false;
-    this.isActive = true;
+    this.isActive = isActive;
     this.dx;
     this.dy;
   }
@@ -200,18 +209,26 @@ class Bullet {
 }
 
 class Bomb extends Bullet {
-  constructor(x, y) {
-    super(x, y);
+  constructor(...par) {
+    super(...par);
     this.image = bomb;
   }
 }
 
-for (let i = 0; i < bulletRange; i++) {
-  bullets.push(new Bullet(0, 0))
+for (let i = 0; i < antisepticVolume; i++) {
+  let isActive = false;
+  if (i < antisepticCount) {
+    isActive = true;
+  }
+  bullets.push(new Bullet(0, 0, isActive))
 }
 
-for (let i = 0; i < bombRange; i++) {
-  bombs.push(new Bomb(0, 0))
+for (let i = 0; i < maskVolume; i++) {
+  let isActive = false;
+  if (i < maskCount) {
+    isActive = true;
+  }
+  bombs.push(new Bomb(0, 0, isActive));
 }
 
 
@@ -237,6 +254,8 @@ const Player = {
   y: canvas.height - 150,
   image: player,
   weapon: gun,
+  health: healthCount,
+  money: moneyCount,
   //bombs: bombs,
   //activeBombs: bombRange,
 }
@@ -359,8 +378,9 @@ function Draw() {
 
   drawScore();
   drawBulletPull();
-  drawBonusCount();
+  drawMoney();
   drawBombCount()
+  drawHealth();
 
   if (rightPressed && Player.x < canvas.width - Player.image.width * 0.5) {
     Player.x += speedPlayer;
@@ -374,7 +394,7 @@ function Draw() {
 
   requestAnimationFrame(Draw);
 }
-
+/*
 const timer = setInterval(addBulets, 2000);
 
 function addBulets() {
@@ -388,24 +408,24 @@ function addBulets() {
       }
     }
   }
-}
+}*/
 
 function getBonus() {
-  const prevBonus = bonusCounter;
+  const prevBonus = Player.money;
   for (const bon of bonuses) {
     if (bon.isDraw && x > bon.x && x < bon.x + bon.image.width &&
       y > bon.y && y < bon.y + bon.image.height) {
       bon.isDraw = false;
-      bonusCounter++;
+      Player.money++;
       break;
     }
   }
-  return (bonusCounter === prevBonus);
+  return (Player.money === prevBonus);
 }
 
 function ZombiAttak(zomb, index) {
 
-  const timer = setInterval(() => {
+  const timer1 = setInterval(() => {
     if (zomb.isDraw) {
       eggs[index].isDraw = true;
       sXZ = (Player.x + Player.image.width * 0.5 * 0.5) - zomb.x;
@@ -419,8 +439,8 @@ function ZombiAttak(zomb, index) {
       eggs[index].dy = dyEgg;
     } else {
       //eggs[index].isDead = true;
-      clearInterval(timer)
-      zombies.shift();
+      clearInterval(timer1)
+      //Не делать так zombies.shift();
     }
   }, zomb.timeAttak)
 }
@@ -509,13 +529,15 @@ function collisionDetection() {
   collisionZombiWeapon(bullets);
   collisionZombiWeapon(bombs);
 
-  for (const egg of eggs) {
-    if (egg.y > Player.y && egg.y < Player.y + Player.image.height * 0.5 &&
+  for (const [i, egg] of eggs.entries()) {
+    if (egg.isDraw && egg.y > Player.y &&
+      egg.y < Player.y + Player.image.height * 0.5 &&
        egg.x > Player.x && egg.x < Player.x + Player.image.width * 0.5) {
-      if (score < 60) {
+      if (Player.health === 0) {
         alert('Проиграш!');
       } else {
-        score -= 10;
+        Player.health -= 10;
+        eggs[i].isDraw = false;
       }
     }
   }
@@ -534,17 +556,24 @@ function drawScore() {
 function drawBulletPull() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Bullet: ' + gun.activeOnes, 8, 62);
+  ctx.fillText('Bullet: ' + gun.activeOnes + '/' + gun.maxCount, 8, 62);
 }
 
-function drawBonusCount() {
+function drawMoney() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Bonus: ' + bonusCounter, 8, 122);
+  ctx.fillText('Money: ' + Player.money, 8, 122);
 }
 
 function drawBombCount() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Bombs: ' + projector.activeOnes, 8, 92);
+  ctx.fillText('Bombs: ' + projector.activeOnes + '/' + projector.maxCount,
+    8, 92);
+}
+
+function drawHealth() {
+  ctx.font = '32px Arial';
+  ctx.fillStyle = 'black';
+  ctx.fillText('Health: ' + Player.health + '/' + healthVolume, 8, 152);
 }

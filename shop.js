@@ -57,30 +57,34 @@ const maskVolume = 5;
 const antisepticCount = 10;
 const antisepticVolume = 15;
 
+const healthPrice = 10;
+const healthVolumePrice = 20;
+const maskPrice = 15;
+const maskVolumePrice = 25;
+const antisepticPrice = 5;
+const antisepticVolumePrice = 15;
+
 const rects = [];
 const buttons = [];
 const topRow = [];
 const images  = [];
 const lines = [];
+const prices = [];
 
-topRow.push(money);
-topRow.push(health);
-topRow.push(antiseptic);
-topRow.push(masks);
-buttons.push(buyPizza, increase, buyAntiseptic, increase, buyMasks, increase);
+topRow.push(money, health, antiseptic, masks);
 
-buttons.push(nextLevel);
+buttons.push(buyPizza, increase, buyAntiseptic, increase, buyMasks,
+  increase, nextLevel);
 
-images.push(antImage);
-images.push(maskImage);
-images.push(pizzaImage);
+images.push(pizzaImage, antImage, maskImage);
 
-lines.push(moneyCount);
-lines.push(healthCount, healthVolume);
-lines.push(antisepticCount, antisepticVolume);
-lines.push(maskCount, maskVolume);
+lines.push(moneyCount, healthCount, healthVolume, antisepticCount,
+  antisepticVolume, maskCount, maskVolume);
 
+prices.push(healthPrice, healthVolumePrice, antisepticPrice,
+  antisepticVolumePrice, maskPrice, maskVolumePrice)
 
+let moneyObj;
 
 const rectLength = 250;
 
@@ -96,6 +100,8 @@ class TopRow {
     if (button2) {
       this.addOnes = button1;
       this.addVolume = button2;
+      this.addOnes.obj = this;
+      this.addVolume.obj = this;
     } else {
       this.parametr = button1;
     }
@@ -110,7 +116,7 @@ class TopRow {
   drawLine() {
     ctx.font = '24px Arial';
     ctx.fillStyle = 'black';
-    if (this.parametr) {
+    if (this.parametr >= 0) {
       ctx.fillText(this.parametr, this.lineX, this.lineY);
     } else {
       ctx.fillText(this.addOnes.parametr + '/' + this.addVolume.parametr,
@@ -121,11 +127,12 @@ class TopRow {
 }
 
 class Buttons {
-  constructor(x, y, image, parametr) {
+  constructor(x, y, image, parametr, price) {
     this.x = x;
     this.y = y;
     this.image = image;
     this.parametr = parametr;
+    this.price = price;
   }
 
   draw() {
@@ -155,7 +162,7 @@ for (let j = 0, y = canvas.height / 3; j < 3; j++, y +=  100 + 60) {
   for (let i = 0, x = canvas.width / 3; i < 2; i++, x += rectLength + 40) {
     //console.log(buttons[rects.length - 4]);
     rects.push(new Buttons(x, y, buttons[rects.length],
-      lines[rects.length + 1]));
+      lines[rects.length + 1], prices[rects.length]));
   }
 }
 
@@ -169,6 +176,7 @@ for (let i = 0, x = 40, k = -2; i < topRow.length;
   console.log('cccccccccc')
   if (k === -2) {
     rects.push(new TopRow(x, topRow[i], moneyCount));
+    moneyObj = rects[rects.length - 1];
   } else {
     rects.push(new TopRow(x, topRow[i], rects[k], rects[k + 1]));
   }
@@ -200,8 +208,13 @@ function clickHandler() {
        x < rect.x + rect.image.width && y > rect.y &&
         y < rect.y + rect.image.height) {
       console.log('cdsacs');
-      rect.increase();
-      Draw();
+      if (moneyObj.parametr - rect.price >= 0 && (rect === rect.obj.addOnes ?
+        rect.obj.addOnes.parametr < rect.obj.addVolume.parametr : true)) {
+        rect.increase();
+        moneyObj.parametr -= rect.price;
+        Draw();
+        break;
+      }
     }
   }
 }
@@ -210,3 +223,5 @@ console.log(topRow);
 console.log(rects);
 console.log(buttons);
 console.log(lines);
+
+console.log(moneyObj);
