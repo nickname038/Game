@@ -12,7 +12,7 @@ function Resize() {
 
 Resize();
 
-let x = 0, y = 0;
+let x, y;
 let sX, sY, k, dx, dy;
 let sXZ, sYZ, K, dxEgg, dyEgg;
 const speedEgg = 4;
@@ -58,14 +58,11 @@ let score = 0;
 const moneyCount = 500;
 const healthCount = 90;
 const healthVolume = 100;
-const maskCount = 3;
-const maskVolume = 5;
-const antisepticCount = 10;
-const antisepticVolume = 15;
+const maskCount = 10;
+const maskVolume = 10;
+const antisepticCount = 20;
+const antisepticVolume = 20;
 
-//let bonusCounter = 0;
-//const bulletRange = 20;
-const bombRange = 5;
 
 let rightPressed = false;
 let leftPressed = false;
@@ -77,6 +74,217 @@ const speedAngryZombi = 5;
 
 const timeAttak = 4000;
 const angTimeAttak = 2000;
+
+
+
+const fon2 = new Image();
+const money = new Image();
+const health = new Image();
+const antiseptic = new Image();
+const masks = new Image();
+const buyAntiseptic = new Image();
+const buyMasks = new Image();
+const buyPizza = new Image();
+const increase = new Image();
+const nextLevel = new Image();
+const maskImage = new Image();
+const pizzaImage = new Image();
+const antImage = new Image();
+
+money.src = 'Image/money.png';
+health.src = 'Image/health.png';
+antiseptic.src = 'Image/antiseptic.png';
+masks.src = 'Image/masks.png';
+buyAntiseptic.src = 'Image/buyAntiseptic.png';
+buyMasks.src = 'Image/buyMasks.png';
+buyPizza.src = 'Image/buyPizza.png';
+increase.src = 'Image/increase.png';
+nextLevel.src = 'Image/nextLevel.png';
+maskImage.src = 'Image/maskImage.jpg';
+pizzaImage.src = 'Image/pizzaImage.jpg';
+antImage.src = 'Image/antImage.jpg';
+fon2.src = 'Image/fon2.jpg';
+
+//fon2.onload = drawShop;
+
+/*const moneyCount = 500;
+const healthCount = 90;
+const healthVolume = 100;
+const maskCount = 3;
+const maskVolume = 5;
+const antisepticCount = 10;
+const antisepticVolume = 15;*/
+
+const healthPrice = 10;
+const healthVolumePrice = 20;
+const maskPrice = 15;
+const maskVolumePrice = 25;
+const antisepticPrice = 5;
+const antisepticVolumePrice = 15;
+
+const maxY = (canvas.height / 3);
+
+const rects = [];
+const buttons = [];
+const topRow = [];
+const images  = [];
+let lines = [];
+const prices = [];
+
+topRow.push(money, health, antiseptic, masks);
+
+buttons.push(buyPizza, increase, buyAntiseptic, increase, buyMasks,
+  increase, nextLevel);
+
+images.push(pizzaImage, antImage, maskImage);
+
+/*lines.push(Player.money, Player.health, Player.healthVolume, gun.activeOnes,
+  gun.maxCount, projector.activeOnes, progector.maxCount);*/
+
+prices.push(healthPrice, healthVolumePrice, antisepticPrice,
+  antisepticVolumePrice, maskPrice, maskVolumePrice)
+
+let moneyObj;
+
+const rectLength = 250;
+
+class TopRow {
+  constructor(x, image, button1, button2) {
+    //this.width = 250;
+    //this.height = 100;
+    this.x = x;
+    this.y = 40;
+    this.image = image;
+    this.lineX = this.x + 165;
+    this.lineY = this.y + 60;
+    if (button2) {
+      this.addOnes = button1;
+      this.addVolume = button2;
+      this.addOnes.obj = this;
+      this.addVolume.obj = this;
+    } else {
+      this.parametr = button1;
+    }
+
+  }
+
+  draw() {
+    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
+      this.x, this.y, this.image.width, this.image.height);
+  }
+
+  drawLine() {
+    ctx.font = '24px Arial';
+    ctx.fillStyle = 'black';
+    if (this.parametr >= 0) {
+      ctx.fillText(this.parametr, this.lineX, this.lineY);
+    } else {
+      ctx.fillText(this.addOnes.parametr + '/' + this.addVolume.parametr,
+        this.lineX, this.lineY);
+    }
+
+  }
+}
+
+class Buttons {
+  constructor(x, y, image, parametr, price) {
+    this.x = x;
+    this.y = y;
+    this.image = image;
+    this.parametr = parametr;
+    this.price = price;
+  }
+
+  draw() {
+    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
+      this.x, this.y, this.image.width, this.image.height);
+  }
+
+  increase() {
+    this.parametr++;
+  }
+}
+
+class Images {
+  constructor(y, image) {
+    this.image = image;
+    this.x = canvas.width / 6;
+    this.y = y;
+  }
+
+  draw() {
+    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
+      this.x, this.y, this.image.width, this.image.height);
+  }
+}
+
+for (let j = 0, y = canvas.height / 3; j < 3; j++, y +=  100 + 60) {
+  for (let i = 0, x = canvas.width / 3; i < 2; i++, x += rectLength + 40) {
+    //console.log(buttons[rects.length - 4]);
+    rects.push(new Buttons(x, y, buttons[rects.length],
+      lines[rects.length + 1], prices[rects.length]));
+  }
+}
+
+
+
+rects.push(new Buttons(canvas.width - rectLength - 40,
+  canvas.height - 100 - 40, buttons[buttons.length - 1]));
+
+for (let i = 0, x = 40, k = -2; i < topRow.length;
+  i++, x += rectLength + 40, k += 2) {
+  if (k === -2) {
+    rects.push(new TopRow(x, topRow[i], moneyCount));
+    moneyObj = rects[rects.length - 1];
+  } else {
+    rects.push(new TopRow(x, topRow[i], rects[k], rects[k + 1]));
+  }
+}
+
+for (let i = 0, y = canvas.height / 3; i < images.length; i++, y += 125 + 40) {
+  rects.push(new Images(y, images[i]));
+}
+
+
+function drawShop() {
+  Player.isInShop = true;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(fon2, 0, 0, fon2.width, fon2.height,
+    0, 0, canvas.width, canvas.height);
+
+  for (const rect of rects) {
+  //console.log(typeof rect.image);
+    rect.draw();
+    if (rect instanceof TopRow) {
+      rect.drawLine();
+    }
+  }
+  //window.requestAnimationFrame(drawShop);
+}
+
+//document.addEventListener('click', clickHandler, false);
+
+function clickButton() {
+  for (const rect of rects) {
+    if (rect instanceof Buttons && x > rect.x &&
+       x < rect.x + rect.image.width && y > rect.y &&
+        y < rect.y + rect.image.height) {
+      console.log('cdsacs');
+      if (moneyObj.parametr - rect.price >= 0 && (rect === rect.obj.addOnes ?
+        rect.obj.addOnes.parametr < rect.obj.addVolume.parametr : true)) {
+        rect.increase();
+        moneyObj.parametr -= rect.price;
+        drawShop();
+        break;
+      }
+    }
+  }
+}
+
+let ID;
+
+
+
 
 const gun = {
   ones: bullets,
@@ -90,7 +298,7 @@ const projector = {
   maxCount: maskVolume,
 }
 
-const maxY = (canvas.height / 3);
+
 
 class Inficed {
   constructor(x, y) {
@@ -169,15 +377,15 @@ class ZombiSH extends Inficed {
 }
 
 const level1 = [
-  { addNewZomb: (x, y) => [new Inficed(x, y)], number: 4 },
-  { addNewZomb: (x, y) => [new Alcoholic(x, y)], number: 3 },
-  { addNewZomb: (x, y) => [new Mather(x, y)], number: 2 },
+  { addNewZomb: (x, y) => [new Inficed(x, y)], number: 1 },
+  { addNewZomb: (x, y) => [new Alcoholic(x, y)], number: 0 },
+  { addNewZomb: (x, y) => [new Mather(x, y)], number: 0 },
   { addNewZomb: (x, y) => [new ZombiSH(x, y),
     new ZombiSH(x + zombi.width * 0.4, y),
     new ZombiSH(x + zombi.width * 0.4 / 2, y - zombi.height * 0.4)],
-  number: 1 }];
+  number: 0 }];
 
-level1.count = 10;
+level1.count = 1;
 
 class Bonus {
   constructor(x, y) {
@@ -255,7 +463,9 @@ const Player = {
   image: player,
   weapon: gun,
   health: healthCount,
+  healthVolume: healthVolume,
   money: moneyCount,
+  isInShop: false,
   //bombs: bombs,
   //activeBombs: bombRange,
 }
@@ -266,6 +476,17 @@ document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
 //document.addEventListener('oncontextmenu', oncontextmenuHandler, false);
 document.addEventListener('click', clickHandler, false);
+
+
+function UpdateShop() {
+  lines = [];
+  lines.push(Player.money, Player.health, Player.healthVolume, gun.activeOnes,
+    gun.maxCount, projector.activeOnes, projector.maxCount);
+  moneyObj.parametr = lines[0];
+  for (let i = 0; i < lines.length; i++) {
+    rects[i].parametr = lines[i + 1];
+  }
+}
 
 
 function zombiUpdate() {
@@ -293,9 +514,7 @@ function zombiUpdate() {
         zomb.x, zomb.y, zomb.image.width * 0.4, zomb.image.height * 0.4)
     }
   }
-  if (!level1.count && zombies.every(chekZombi)) {
-    Stop();
-  }
+
 }
 
 function chekZombi(zomb) {
@@ -352,6 +571,8 @@ function eggUpdate() {
   }
 }
 
+//ID = setInterval(Draw, 60 / 200);
+
 function Draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(flat, 0, 0, flat.width, flat.height,
@@ -376,11 +597,7 @@ function Draw() {
     eggs.shift();
   }
 
-  drawScore();
-  drawBulletPull();
-  drawMoney();
-  drawBombCount()
-  drawHealth();
+
 
   if (rightPressed && Player.x < canvas.width - Player.image.width * 0.5) {
     Player.x += speedPlayer;
@@ -389,11 +606,26 @@ function Draw() {
     Player.x -= speedPlayer;
   }
 
+
+
+  if (!level1.count && zombies.every(chekZombi)) {
+    Stop();
+    return;
+  }
+
   ctx.drawImage(player, 0, 0, player.width, player.height,
     Player.x, Player.y, player.width * 0.5, player.height * 0.5)
 
-  requestAnimationFrame(Draw);
+  drawScore();
+  drawBulletPull();
+  drawMoney();
+  drawBombCount()
+  drawHealth();
+
+  ID = window.requestAnimationFrame(Draw);
 }
+
+
 /*
 const timer = setInterval(addBulets, 2000);
 
@@ -473,7 +705,9 @@ function keyUpHandler(e) {
 }
 
 function clickHandler() {
-  if (getBonus()) {
+  if (Player.isInShop) {
+    clickButton();
+  } else if (getBonus()) {
     sX = x - Player.x - Player.image.width * 0.5 * 0.5;
     sY = y - Player.y;
     k = sX / sY;
@@ -544,7 +778,11 @@ function collisionDetection() {
 }
 
 function Stop() {
-  alert(`Счет: ${score}`);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  window.cancelAnimationFrame(ID);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  UpdateShop();
+  drawShop();
 }
 
 function drawScore() {
