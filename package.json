@@ -1,0 +1,10 @@
+{
+  "name": "Game",
+  "version": "1.0.0",
+  "description": "browser JavaScript game",
+  "main": "game.html",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.5.5"
+  }
+}
