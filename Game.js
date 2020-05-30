@@ -3,37 +3,38 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-window.addEventListener('resize', Resize);
+window.addEventListener('resize', resize);
 
-function Resize() {
+function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 
-Resize();
+resize();
 
 let x, y;
 let sX, sY, k, dx, dy;
 let sXZ, sYZ, K, dxEgg, dyEgg;
 const speedEgg = 4;
 
-
 window.onmousemove = function(event) {
   x = event.pageX;
   y = event.pageY;
 }
 
-const egg = new Image();
-const bullet = new Image();
-const player = new Image();
-const zombi = new Image();
-const flat = new Image();
-const bonus = new Image();
-const zombiAlc = new Image();
-const bomb = new Image();
-const zombMam = new Image();
-const zombChild = new Image();
-const zombSH = new Image();
+const images = {};
+
+images.egg = new Image();
+images.bullet = new Image();
+images.player = new Image();
+images.zombi = new Image();
+images.flat = new Image();
+images.bonus = new Image();
+images.zombiAlc = new Image();
+images.bomb = new Image();
+images.zombMam = new Image();
+images.zombChild = new Image();
+images.zombSH = new Image();
 
 const zombies = [];
 const bullets = [];
@@ -41,17 +42,17 @@ const eggs = [];
 const bonuses = [];
 const bombs = [];
 
-egg.src = 'Image/egg1.png';
-bullet.src = 'Image/bullet1.png';
-player.src = 'Image/prog.jpg';
-zombi.src = 'Image/zombi.png';
-flat.src = 'Image/k-18.jpg';
-bonus.src = 'Image/bonus.jpg';
-zombiAlc.src = 'Image/zombiAlc.png';
-bomb.src = 'Image/bomb.png';
-zombMam.src = 'Image/mama.png';
-zombChild.src = 'Image/child.png';
-zombSH.src = 'Image/ZombiSH.png';
+images.egg.src = 'Image/egg1.png';
+images.bullet.src = 'Image/bullet1.png';
+images.player.src = 'Image/prog.jpg';
+images.zombi.src = 'Image/zombi.png';
+images.flat.src = 'Image/k-18.jpg';
+images.bonus.src = 'Image/bonus.jpg';
+images.zombiAlc.src = 'Image/zombiAlc.png';
+images.bomb.src = 'Image/bomb.png';
+images.zombMam.src = 'Image/mama.png';
+images.zombChild.src = 'Image/child.png';
+images.zombSH.src = 'Image/ZombiSH.png';
 
 let score = 0;
 
@@ -62,7 +63,6 @@ const maskCount = 10;
 const maskVolume = 10;
 const antisepticCount = 20;
 const antisepticVolume = 20;
-
 
 let rightPressed = false;
 let leftPressed = false;
@@ -75,45 +75,33 @@ const speedAngryZombi = 5;
 const timeAttak = 4000;
 const angTimeAttak = 2000;
 
+images.fon2 = new Image();
+images.money = new Image();
+images.health = new Image();
+images.antiseptic = new Image();
+images.masks = new Image();
+images.buyAntiseptic = new Image();
+images.buyMasks = new Image();
+images.buyPizza = new Image();
+images.increase = new Image();
+images.nextLevel = new Image();
+images.maskImage = new Image();
+images.pizzaImage = new Image();
+images.antImage = new Image();
 
-
-const fon2 = new Image();
-const money = new Image();
-const health = new Image();
-const antiseptic = new Image();
-const masks = new Image();
-const buyAntiseptic = new Image();
-const buyMasks = new Image();
-const buyPizza = new Image();
-const increase = new Image();
-const nextLevel = new Image();
-const maskImage = new Image();
-const pizzaImage = new Image();
-const antImage = new Image();
-
-money.src = 'Image/money.png';
-health.src = 'Image/health.png';
-antiseptic.src = 'Image/antiseptic.png';
-masks.src = 'Image/masks.png';
-buyAntiseptic.src = 'Image/buyAntiseptic.png';
-buyMasks.src = 'Image/buyMasks.png';
-buyPizza.src = 'Image/buyPizza.png';
-increase.src = 'Image/increase.png';
-nextLevel.src = 'Image/nextLevel.png';
-maskImage.src = 'Image/maskImage.jpg';
-pizzaImage.src = 'Image/pizzaImage.jpg';
-antImage.src = 'Image/antImage.jpg';
-fon2.src = 'Image/fon2.jpg';
-
-//fon2.onload = drawShop;
-
-/*const moneyCount = 500;
-const healthCount = 90;
-const healthVolume = 100;
-const maskCount = 3;
-const maskVolume = 5;
-const antisepticCount = 10;
-const antisepticVolume = 15;*/
+images.money.src = 'Image/money.png';
+images.health.src = 'Image/health.png';
+images.antiseptic.src = 'Image/antiseptic.png';
+images.masks.src = 'Image/masks.png';
+images.buyAntiseptic.src = 'Image/buyAntiseptic.png';
+images.buyMasks.src = 'Image/buyMasks.png';
+images.buyPizza.src = 'Image/buyPizza.png';
+images.increase.src = 'Image/increase.png';
+images.nextLevel.src = 'Image/nextLevel.png';
+images.maskImage.src = 'Image/maskImage.jpg';
+images.pizzaImage.src = 'Image/pizzaImage.jpg';
+images.antImage.src = 'Image/antImage.jpg';
+images.fon2.src = 'Image/fon2.jpg';
 
 const healthPrice = 10;
 const healthVolumePrice = 20;
@@ -122,41 +110,73 @@ const maskVolumePrice = 25;
 const antisepticPrice = 5;
 const antisepticVolumePrice = 15;
 
-const maxY = (canvas.height / 3);
+const maxY = canvas.height / 3;
+const imageX = canvas.width / 6;
+const topRowY = 40;
+const lineX = 165;
+const lineY = 60;
+const rectHeigth = 100;
+const lineButtonNumber = 3;
+const columnButtonNumber = 2;
+const paddingY = 60;
+const paddingX = 40;
+const imageSize = 125;
 
 const rects = [];
 const buttons = [];
 const topRow = [];
-const images  = [];
+const shopImages  = [];
 let lines = [];
 const prices = [];
 
-topRow.push(money, health, antiseptic, masks);
+const coordinatesOfButtonY = [];
+const coordinatesOfButtonX = [];
 
-buttons.push(buyPizza, increase, buyAntiseptic, increase, buyMasks,
-  increase, nextLevel);
+const keyCods = {
+  enter: 13,
+  right: 39,
+  left: 37,
+}
 
-images.push(pizzaImage, antImage, maskImage);
+topRow.push(images.money, images.health, images.antiseptic, images.masks);
 
-/*lines.push(Player.money, Player.health, Player.healthVolume, gun.activeOnes,
-  gun.maxCount, projector.activeOnes, progector.maxCount);*/
+buttons.push(
+  images.buyPizza, images.increase, images.buyAntiseptic, images.increase,
+  images.buyMasks, images.increase, images.nextLevel
+);
 
-prices.push(healthPrice, healthVolumePrice, antisepticPrice,
-  antisepticVolumePrice, maskPrice, maskVolumePrice)
+shopImages.push(images.pizzaImage, images.antImage, images.maskImage);
 
-let moneyObj;
+prices.push(
+  healthPrice, healthVolumePrice, antisepticPrice,
+  antisepticVolumePrice, maskPrice, maskVolumePrice
+);
 
 const rectLength = 250;
 
-class TopRow {
-  constructor(x, image, button1, button2) {
-    //this.width = 250;
-    //this.height = 100;
-    this.x = x;
-    this.y = 40;
+class Images {
+  constructor(y, image) {
     this.image = image;
-    this.lineX = this.x + 165;
-    this.lineY = this.y + 60;
+    this.x = imageX;
+    this.y = y;
+  }
+
+  draw() {
+    ctx.drawImage(
+      this.image, 0, 0,
+      this.image.width, this.image.height,
+      this.x, this.y,
+      this.image.width, this.image.height
+    );
+  }
+}
+
+class TopRow extends Images {
+  constructor(x, image, button1, button2) {
+    super(topRowY, image);
+    this.x = x;
+    this.lineX = this.x + lineX;
+    this.lineY = this.y + lineY;
     if (button2) {
       this.addOnes = button1;
       this.addVolume = button2;
@@ -165,126 +185,88 @@ class TopRow {
     } else {
       this.parametr = button1;
     }
-
-  }
-
-  draw() {
-    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
-      this.x, this.y, this.image.width, this.image.height);
   }
 
   drawLine() {
     ctx.font = '24px Arial';
     ctx.fillStyle = 'black';
     if (this.parametr >= 0) {
-      ctx.fillText(this.parametr, this.lineX, this.lineY);
+      ctx.fillText(`${this.parametr}`, this.lineX, this.lineY);
     } else {
-      ctx.fillText(this.addOnes.parametr + '/' + this.addVolume.parametr,
+      ctx.fillText(`${this.addOnes.parametr}/${this.addVolume.parametr}`,
         this.lineX, this.lineY);
     }
-
   }
 }
 
-class Buttons {
+class Buttons extends Images {
   constructor(x, y, image, parametr, price) {
+    super(y, image);
     this.x = x;
-    this.y = y;
-    this.image = image;
     this.parametr = parametr;
     this.price = price;
-  }
-
-  draw() {
-    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
-      this.x, this.y, this.image.width, this.image.height);
   }
 
   increase() {
     this.parametr++;
   }
-}
 
-class Images {
-  constructor(y, image) {
-    this.image = image;
-    this.x = canvas.width / 6;
-    this.y = y;
-  }
-
-  draw() {
-    ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height,
-      this.x, this.y, this.image.width, this.image.height);
-  }
-}
-
-for (let j = 0, y = canvas.height / 3; j < 3; j++, y +=  100 + 60) {
-  for (let i = 0, x = canvas.width / 3; i < 2; i++, x += rectLength + 40) {
-    //console.log(buttons[rects.length - 4]);
-    rects.push(new Buttons(x, y, buttons[rects.length],
-      lines[rects.length + 1], prices[rects.length]));
-  }
-}
-
-
-
-rects.push(new Buttons(canvas.width - rectLength - 40,
-  canvas.height - 100 - 40, buttons[buttons.length - 1]));
-
-for (let i = 0, x = 40, k = -2; i < topRow.length;
-  i++, x += rectLength + 40, k += 2) {
-  if (k === -2) {
-    rects.push(new TopRow(x, topRow[i], moneyCount));
-    moneyObj = rects[rects.length - 1];
-  } else {
-    rects.push(new TopRow(x, topRow[i], rects[k], rects[k + 1]));
-  }
-}
-
-for (let i = 0, y = canvas.height / 3; i < images.length; i++, y += 125 + 40) {
-  rects.push(new Images(y, images[i]));
-}
-
-
-function drawShop() {
-  Player.isInShop = true;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(fon2, 0, 0, fon2.width, fon2.height,
-    0, 0, canvas.width, canvas.height);
-
-  for (const rect of rects) {
-  //console.log(typeof rect.image);
-    rect.draw();
-    if (rect instanceof TopRow) {
-      rect.drawLine();
+  get canIncrease() {
+    if (this === this.obj.addVolume || (this === this.obj.addOnes &&
+      this.parametr < this.obj.addVolume.parametr)) {
+      return true;
     }
+    return false;
   }
-  //window.requestAnimationFrame(drawShop);
 }
 
-//document.addEventListener('click', clickHandler, false);
+const buttonX = canvas.width / 3;
+const buttonY = canvas.height / 3;
 
-function clickButton() {
-  for (const rect of rects) {
-    if (rect instanceof Buttons && x > rect.x &&
-       x < rect.x + rect.image.width && y > rect.y &&
-        y < rect.y + rect.image.height) {
-      console.log('cdsacs');
-      if (moneyObj.parametr - rect.price >= 0 && (rect === rect.obj.addOnes ?
-        rect.obj.addOnes.parametr < rect.obj.addVolume.parametr : true)) {
-        rect.increase();
-        moneyObj.parametr -= rect.price;
-        drawShop();
-        break;
-      }
-    }
+for (let i = 0; i < lineButtonNumber; i++) {
+  coordinatesOfButtonY.push(buttonY + (rectHeigth + paddingY) * i);
+}
+
+for (let i = 0; i < columnButtonNumber; i++) {
+  coordinatesOfButtonX.push(buttonX + (rectLength + paddingX) * i);
+}
+
+for (let i = 0; i < lineButtonNumber; i++) {
+  y = coordinatesOfButtonY[i];
+  for (let j = 0; j < columnButtonNumber; j++) {
+    x = coordinatesOfButtonX[j];
+    rects.push(
+      new Buttons(x, y, buttons[rects.length],
+        lines[rects.length + 1], prices[rects.length])
+    );
   }
+}
+
+rects.push(
+  new Buttons(canvas.width - rectLength - paddingX,
+    canvas.height - rectHeigth - paddingY, buttons[buttons.length - 1])
+);
+
+const nextLevelButton = rects[rects.length - 1];
+
+rects.push(new TopRow(paddingX, topRow[0], moneyCount));
+const moneyObj = rects[rects.length - 1];
+
+for (let i = 1; i < topRow.length; i++) {
+  const x = paddingX + (paddingX + rectLength) * i;
+  const indexOfButton1 = (i - 1) * 2;
+  const indexOfButton2 = indexOfButton1 + 1;
+  rects.push(
+    new TopRow(x, topRow[i], rects[indexOfButton1], rects[indexOfButton2])
+  );
+}
+
+for (let i = 0, y = buttonY; i < shopImages.length; i++,
+y += imageSize + topRowY) {
+  rects.push(new Images(y, shopImages[i]));
 }
 
 let ID;
-
-
-
 
 const gun = {
   ones: bullets,
@@ -298,51 +280,37 @@ const projector = {
   maxCount: maskVolume,
 }
 
-
-
 class Inficed {
-  constructor(x, y) {
-    this.image = zombi;
+  constructor(x, y, image) {
+    this.image = image;
     this.x = x;
     this.y = y;
     this.isDraw = true;
     this.isDead = false;
-    //this.eggY = RandomInteger(0, canvas.height);
-    this.hasEgg = false;
-    this.hasBonus = RandomInteger(0, 1000) > 500
+    this.egg = null;
+    this.hasBonus = randomInteger(0, 1000) > 500;
     this.speed = speedZombi;
     this.timeAttak = timeAttak;
   }
 
-  Update() {
+  update() {
     if (this.y < maxY) {
       this.y += this.speed;
     }
-
-    if (this.y >= maxY && this.hasEgg === false && this.isDraw === true) {
-      this.hasEgg = true;
-    }
   }
 }
 
-class Alcoholic extends Inficed {
-  constructor(x, y) {
-    super(x, y);
-    this.image = zombiAlc;
-  }
-
-}
+class Alcoholic extends Inficed {}
 
 class Children extends Inficed {
-  constructor(x, y, mam) {
-    super(x, y);
-    this.image = zombChild;
+  constructor(x, y, image, mam) {
+    super(x, y, image);
     this.mother = mam;
     this.isAngry = false;
   }
-  Update() {
-    super.Update();
-    if (!(this.mother.isDraw) && this.speed === speedZombi) {
+  update() {
+    super.update();
+    if (!this.mother.isDraw && this.speed === speedZombi) {
       this.isAngry = true;
       this.speed = speedAngryZombi;
     }
@@ -353,144 +321,149 @@ class Children extends Inficed {
 }
 
 class Mather extends Inficed {
-  constructor(x, y) {
-    super(x, y);
-    this.image = zombMam;
+  constructor(...par) {
+    super(...par);
     this.child = null;
   }
 
-  Update() {
+  update() {
     if (this.child) {
-      super.Update();
+      super.update();
     } else {
-      this.child = new Children(this.x + zombMam.width * 0.4, this.y, this);
+      this.child = new Children(
+        this.x + this.image.width, this.y, images.zombChild, this
+      );
       zombies.push(this.child);
     }
   }
 }
 
-class ZombiSH extends Inficed {
-  constructor(x, y) {
-    super(x, y);
-    this.image = zombSH;
-  }
-}
+class ZombiSH extends Inficed {}
 
 const level1 = [
-  { addNewZomb: (x, y) => [new Inficed(x, y)], number: 1 },
-  { addNewZomb: (x, y) => [new Alcoholic(x, y)], number: 0 },
-  { addNewZomb: (x, y) => [new Mather(x, y)], number: 0 },
-  { addNewZomb: (x, y) => [new ZombiSH(x, y),
-    new ZombiSH(x + zombi.width * 0.4, y),
-    new ZombiSH(x + zombi.width * 0.4 / 2, y - zombi.height * 0.4)],
-  number: 0 }];
+  { addNewZomb: (x, y) => [new Inficed(x, y, images.zombi)], number: 1 },
+  { addNewZomb: (x, y) => [new Alcoholic(x, y, images.zombiAlc)], number: 1 },
+  { addNewZomb: (x, y) => [new Mather(x, y, images.zombMam)], number: 1 },
+  { addNewZomb: (x, y) => [new ZombiSH(x, y, images.zombSH),
+    new ZombiSH(x + images.zombi.width, y, images.zombSH),
+    new ZombiSH(
+      x + images.zombi.width / 2,
+      y - images.zombi.height, images.zombSH)
+  ],
+  number: 1 }];
 
-level1.count = 1;
+level1.count = 4;
+
+const levels = [level1];
 
 class Bonus {
   constructor(x, y) {
-    this.image = bonus;
+    this.image = images.bonus;
     this.x = x;
     this.y = y;
     this.isDraw = true;
   }
 }
 
-class Bullet {
-  constructor(x, y, isActive) {
-    this.image = bullet;
+class Egg {
+  constructor(x, y, image) {
+    this.image = image;
     this.x = x;
     this.y = y;
-    this.isDraw = false;
-    this.isActive = isActive;
     this.dx;
     this.dy;
+    this.isDraw = false;
   }
 
-  Update() {
+  update() {
     this.y += this.dy;
     this.x += this.dx;
+  }
+}
+
+class Bullet extends Egg {
+  constructor(x, y, image, isActive) {
+    super(x, y, image);
+    this.isActive = isActive;
+  }
+
+  update() {
+    super.update();
     if (this.y < -50) {
       this.isDead = true;
     }
   }
 }
 
-class Bomb extends Bullet {
-  constructor(...par) {
-    super(...par);
-    this.image = bomb;
-  }
-}
+class Bomb extends Bullet {}
 
 for (let i = 0; i < antisepticVolume; i++) {
-  let isActive = false;
-  if (i < antisepticCount) {
-    isActive = true;
-  }
-  bullets.push(new Bullet(0, 0, isActive))
+  bullets.push(new Bullet(0, 0, images.bullet, i < antisepticCount));
 }
 
 for (let i = 0; i < maskVolume; i++) {
-  let isActive = false;
-  if (i < maskCount) {
-    isActive = true;
-  }
-  bombs.push(new Bomb(0, 0, isActive));
-}
-
-
-class Egg {
-  constructor(x, y) {
-    this.image = egg;
-    this.x = x;
-    this.y = y;
-    this.dx = 0;
-    this.dy = 0;
-    this.isDraw = false;
-    //this.isDead = false;
-  }
-
-  Update() {
-    this.y += this.dy;
-    this.x += this.dx;
-  }
+  bombs.push(new Bomb(0, 0, images.bomb, i < maskCount));
 }
 
 const Player = {
   x: canvas.width / 2,
   y: canvas.height - 150,
-  image: player,
+  image: images.player,
   weapon: gun,
   health: healthCount,
-  healthVolume: healthVolume,
+  healthVolume,
   money: moneyCount,
   isInShop: false,
-  //bombs: bombs,
-  //activeBombs: bombRange,
+  level: levels[0],
 }
 
-flat.onload = Draw;
+images.flat.onload = draw;
 
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
-//document.addEventListener('oncontextmenu', oncontextmenuHandler, false);
 document.addEventListener('click', clickHandler, false);
 
+function isInObj(obj1, x, y) {
+  if (x > obj1.x && x < obj1.x + obj1.image.width &&
+     y > obj1.y && y < obj1.y + obj1.image.height) {
+    return true;
+  }
+  return false;
+}
 
-function UpdateShop() {
+function drawShop() {
+  Player.isInShop = true;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(
+    images.fon2, 0, 0,
+    images.fon2.width, images.fon2.height,
+    0, 0,
+    canvas.width, canvas.height
+  );
+
+  for (const rect of rects) {
+    rect.draw();
+    if (rect instanceof TopRow) {
+      rect.drawLine();
+    }
+  }
+}
+
+function updateShop() {
   lines = [];
-  lines.push(Player.money, Player.health, Player.healthVolume, gun.activeOnes,
-    gun.maxCount, projector.activeOnes, projector.maxCount);
+  lines.push(
+    Player.money, Player.health, Player.healthVolume, gun.activeOnes,
+    gun.maxCount, projector.activeOnes, projector.maxCount
+  );
+
   moneyObj.parametr = lines[0];
   for (let i = 0; i < lines.length; i++) {
     rects[i].parametr = lines[i + 1];
   }
 }
 
-
 function zombiUpdate() {
-  if (RandomInteger(0, 10000) > 9950) {
+  if (randomInteger(0, 10000) > 9950) {
     const newZombi = addZombi();
     if (newZombi) {
       zombies.push(...newZombi);
@@ -499,42 +472,54 @@ function zombiUpdate() {
 
   for (const zomb of zombies) {
 
-    zomb.Update();
+    zomb.update();
 
-    if (zomb.hasEgg) {
-      eggs.push(new Egg(zomb.x +  zomb.image.width * 0.4 / 2,
-        zomb.y + zomb.image.height * 0.4))
-      const index = eggs.length - 1;
-      ZombiAttak(zomb, index);
-      zomb.hasEgg = undefined;
+    if (!zomb.egg && zomb.y >= maxY) {
+      eggs.push(
+        new Egg(zomb.x +  zomb.image.width / 2,
+          zomb.y + zomb.image.height, images.egg)
+      );
+      zomb.egg = eggs[eggs.length - 1];
+      zombiAttak(zomb);
     }
 
     if (zomb.isDraw) {
-      ctx.drawImage(zomb.image, 0, 0, zomb.image.width, zomb.image.height,
-        zomb.x, zomb.y, zomb.image.width * 0.4, zomb.image.height * 0.4)
+      ctx.drawImage(
+        zomb.image, 0, 0,
+        zomb.image.width, zomb.image.height,
+        zomb.x, zomb.y, zomb.image.width,
+        zomb.image.height
+      );
     }
   }
-
 }
 
 function chekZombi(zomb) {
-  return !(zomb.isDraw)
+  return !zomb.isDraw;
 }
 
 function weaponUpdate() {
   for (const bul of bullets) {
     if (bul.isDraw) {
-      bul.Update();
-      ctx.drawImage(bul.image, 0, 0, bul.image.width, bul.image.height,
-        bul.x, bul.y, bul.image.width, bul.image.height);
+      bul.update();
+      ctx.drawImage(
+        bul.image, 0, 0,
+        bul.image.width, bul.image.height,
+        bul.x, bul.y,
+        bul.image.width, bul.image.height
+      );
     }
   }
 
   for (const bomb of bombs) {
     if (bomb.isDraw) {
-      bomb.Update();
-      ctx.drawImage(bomb.image, 0, 0, bomb.image.width, bomb.image.height,
-        bomb.x, bomb.y, bomb.image.width, bomb.image.height);
+      bomb.update();
+      ctx.drawImage(
+        bomb.image, 0, 0,
+        bomb.image.width, bomb.image.height,
+        bomb.x, bomb.y,
+        bomb.image.width, bomb.image.height
+      );
     }
   }
 }
@@ -542,41 +527,49 @@ function weaponUpdate() {
 function bonusUpdate() {
   for (const bon of bonuses) {
     if (bon.isDraw) {
-      ctx.drawImage(bon.image, 0, 0, bon.image.width, bon.image.height,
-        bon.x, bon.y, bon.image.width, bon.image.height)
+      ctx.drawImage(
+        bon.image, 0, 0,
+        bon.image.width, bon.image.height,
+        bon.x, bon.y,
+        bon.image.width, bon.image.height
+      );
     }
   }
 }
 
 function addZombi() {
-  const numb = '' + RandomInteger(0, 3);
-  const zombX = RandomInteger(30, canvas.width - 2 * zombi.width * 0.4);
-  const zombY = RandomInteger(250, 400) * -1;
-  console.log(numb);
-  if (level1[numb].number) {
-    console.log('dddddddddddd');
-    level1[numb].number--
-    level1.count--;
-    return level1[numb].addNewZomb(zombX, zombY);
+  const numb = '' + randomInteger(0, 3);
+  const zombX = randomInteger(30, canvas.width - 2 * images.zombi.width);
+  const zombY = randomInteger(250, 400) * -1;
+  if (Player.level[numb].number) {
+    Player.level[numb].number--
+    Player.level.count--;
+    return Player.level[numb].addNewZomb(zombX, zombY);
   }
 }
 
 function eggUpdate() {
   for (const egg of eggs) {
     if (egg.isDraw) {
-      egg.Update();
-      ctx.drawImage(egg.image, 0, 0, egg.image.width, egg.image.height,
-        egg.x, egg.y, egg.image.width, egg.image.height)
+      egg.update();
+      ctx.drawImage(
+        egg.image, 0, 0,
+        egg.image.width, egg.image.height,
+        egg.x, egg.y,
+        egg.image.width, egg.image.height
+      );
     }
   }
 }
 
-//ID = setInterval(Draw, 60 / 200);
-
-function Draw() {
+function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(flat, 0, 0, flat.width, flat.height,
-    0, 0, canvas.width, canvas.height)
+  ctx.drawImage(
+    images.flat, 0, 0,
+    images.flat.width, images.flat.height,
+    0, 0,
+    canvas.width, canvas.height
+  );
 
   collisionDetection();
 
@@ -587,8 +580,6 @@ function Draw() {
   weaponUpdate();
   const deadEgg = eggUpdate();
 
-
-
   if (deadZombi) {
     zombies.shift();
   }
@@ -597,97 +588,65 @@ function Draw() {
     eggs.shift();
   }
 
-
-
-  if (rightPressed && Player.x < canvas.width - Player.image.width * 0.5) {
+  if (rightPressed && Player.x < canvas.width - Player.image.width) {
     Player.x += speedPlayer;
 
   } else if (leftPressed && Player.x > 0) {
     Player.x -= speedPlayer;
   }
 
-
-
-  if (!level1.count && zombies.every(chekZombi)) {
-    Stop();
+  if (!Player.level.count && zombies.every(chekZombi)) {
+    stop();
     return;
   }
 
-  ctx.drawImage(player, 0, 0, player.width, player.height,
-    Player.x, Player.y, player.width * 0.5, player.height * 0.5)
+  ctx.drawImage(
+    Player.image, 0, 0,
+    Player.image.width, Player.image.height,
+    Player.x, Player.y,
+    Player.image.width, Player.image.height
+  );
 
   drawScore();
   drawBulletPull();
   drawMoney();
-  drawBombCount()
+  drawBombCount();
   drawHealth();
 
-  ID = window.requestAnimationFrame(Draw);
+  ID = window.requestAnimationFrame(draw);
 }
 
-
-/*
-const timer = setInterval(addBulets, 2000);
-
-function addBulets() {
-  if (Player.weapon.activeOnes < Player.weapon.maxCount) {
-    for (const bul of Player.weapon.ones) {
-      if (!bul.isActive && (bul.isDraw === false || bul.y < 50 ||
-         bul.x < -20 || bul.x > canvas.width + 20)) {
-        bul.isActive = true;
-        Player.weapon.activeOnes++;
-        break;
-      }
-    }
-  }
-}*/
-
-function getBonus() {
-  const prevBonus = Player.money;
-  for (const bon of bonuses) {
-    if (bon.isDraw && x > bon.x && x < bon.x + bon.image.width &&
-      y > bon.y && y < bon.y + bon.image.height) {
-      bon.isDraw = false;
-      Player.money++;
-      break;
-    }
-  }
-  return (Player.money === prevBonus);
-}
-
-function ZombiAttak(zomb, index) {
+function zombiAttak(zomb) {
 
   const timer1 = setInterval(() => {
     if (zomb.isDraw) {
-      eggs[index].isDraw = true;
-      sXZ = (Player.x + Player.image.width * 0.5 * 0.5) - zomb.x;
+      zomb.egg.isDraw = true;
+      sXZ = (Player.x + Player.image.width * 0.5) - zomb.x;
       sYZ = Player.y - zomb.y;
       K = sXZ / sYZ;
       dyEgg = Math.sqrt((speedEgg ** 2) / (1 + (K ** 2)));
       dxEgg = (K * dyEgg);
-      eggs[index].x = zomb.x;
-      eggs[index].y = zomb.y;
-      eggs[index].dx = dxEgg;
-      eggs[index].dy = dyEgg;
+      zomb.egg.x = zomb.x;
+      zomb.egg.y = zomb.y;
+      zomb.egg.dx = dxEgg;
+      zomb.egg.dy = dyEgg;
     } else {
-      //eggs[index].isDead = true;
       clearInterval(timer1)
-      //Не делать так zombies.shift();
     }
   }, zomb.timeAttak)
 }
 
-function RandomInteger(min, max) {
+function randomInteger(min, max) {
   const rand = min - 0.5 + Math.random() * (max - min + 1);
   return Math.round(rand);
 }
 
 function keyDownHandler(e) {
-  if (e.keyCode === 39) {
+  if (e.keyCode === keyCods.right) {
     rightPressed = true;
-  } else if (e.keyCode === 37) {
+  } else if (e.keyCode === keyCods.left) {
     leftPressed = true;
-  } else if (e.keyCode === 13) {
+  } else if (e.keyCode === keyCods.enter) {
     if (Player.weapon === gun) {
       Player.weapon = projector;
     } else {
@@ -697,9 +656,9 @@ function keyDownHandler(e) {
 }
 
 function keyUpHandler(e) {
-  if (e.keyCode === 39) {
+  if (e.keyCode === keyCods.right) {
     rightPressed = false;
-  } else if (e.keyCode === 37) {
+  } else if (e.keyCode === keyCods.left) {
     leftPressed = false;
   }
 }
@@ -708,7 +667,7 @@ function clickHandler() {
   if (Player.isInShop) {
     clickButton();
   } else if (getBonus()) {
-    sX = x - Player.x - Player.image.width * 0.5 * 0.5;
+    sX = x - Player.x - Player.image.width * 0.5;
     sY = y - Player.y;
     k = sX / sY;
     dy = -Math.sqrt((speedBullet ** 2) / (1 + k ** 2));
@@ -719,7 +678,7 @@ function clickHandler() {
         if (bul.isActive) {
           bul.isActive = false;
           bul.isDraw = true;
-          bul.x = Player.x + Player.image.width * 0.5 * 0.5;
+          bul.x = Player.x + Player.image.width * 0.5;
           bul.y = Player.y;
           bul.dx = dx;
           bul.dy = dy;
@@ -730,11 +689,45 @@ function clickHandler() {
   }
 }
 
+function clickButton() {
+  for (const rect of rects) {
+    const isCursorInObj = isInObj(rect, x, y);
+    if (rect instanceof Buttons && isCursorInObj) {
+      if (moneyObj.parametr - rect.price >= 0 && rect.canIncrease) {
+        rect.increase();
+        moneyObj.parametr -= rect.price;
+        drawShop();
+        break;
+      } else if (rect === nextLevelButton) {
+        const index = levels.indexOf(Player.level) + 1;
+        if (levels[index]) {
+          Player.level = levels[index];
+          Player.isInShop = false;
+          draw();
+        }
+      }
+    }
+  }
+}
+
+function getBonus() {
+  const prevBonus = Player.money;
+  for (const bon of bonuses) {
+    const isCursorInObj = isInObj(bon, x, y);
+    if (bon.isDraw && isCursorInObj) {
+      bon.isDraw = false;
+      Player.money++;
+      break;
+    }
+  }
+  return (Player.money === prevBonus);
+}
+
 function collisionZombiWeapon(weapon) {
   for (const bul of weapon) {
     for (const zomb of zombies) {
-      if (bul.x > zomb.x && bul.x < zomb.x + zomb.image.width * 0.4 &&
-        bul.y < zomb.y + zomb.image.height * 0.4 && bul.isDraw && zomb.isDraw) {
+      const isBulInZomb = isInObj(zomb, bul.x, bul.y);
+      if (isBulInZomb && bul.isDraw && zomb.isDraw) {
         if (weapon === bullets && zomb instanceof Alcoholic) {
           continue;
         } else if (zomb instanceof Children && zomb.mother.isDraw) {
@@ -757,18 +750,16 @@ function collisionZombiWeapon(weapon) {
   }
 }
 
-
 function collisionDetection() {
 
   collisionZombiWeapon(bullets);
   collisionZombiWeapon(bombs);
 
   for (const [i, egg] of eggs.entries()) {
-    if (egg.isDraw && egg.y > Player.y &&
-      egg.y < Player.y + Player.image.height * 0.5 &&
-       egg.x > Player.x && egg.x < Player.x + Player.image.width * 0.5) {
-      if (Player.health === 0) {
-        alert('Проиграш!');
+    const isEggInPlayer = isInObj(Player, egg.x, egg.y);
+    if (egg.isDraw && isEggInPlayer) {
+      if (Player.health <= 0) {
+        alert('Проигрыш!');
       } else {
         Player.health -= 10;
         eggs[i].isDraw = false;
@@ -777,41 +768,43 @@ function collisionDetection() {
   }
 }
 
-function Stop() {
+function stop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   window.cancelAnimationFrame(ID);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  UpdateShop();
+  updateShop();
   drawShop();
 }
 
 function drawScore() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Score: ' + score, 8, 32);
+  ctx.fillText(`Score: ${score}`, 8, 32);
 }
 
 function drawBulletPull() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Bullet: ' + gun.activeOnes + '/' + gun.maxCount, 8, 62);
+  const { activeOnes, maxCount } = gun;
+  ctx.fillText(`Bullet: ${activeOnes}/${maxCount}`, 8, 62);
 }
 
 function drawMoney() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Money: ' + Player.money, 8, 122);
+  ctx.fillText(`Money: ${Player.money}`, 8, 122);
 }
 
 function drawBombCount() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Bombs: ' + projector.activeOnes + '/' + projector.maxCount,
+  const { activeOnes, maxCount } = projector;
+  ctx.fillText(`Bombs: ${activeOnes}/${maxCount}`,
     8, 92);
 }
 
 function drawHealth() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText('Health: ' + Player.health + '/' + healthVolume, 8, 152);
+  ctx.fillText(`Health: ${Player.health}/${healthVolume}`, 8, 152);
 }
