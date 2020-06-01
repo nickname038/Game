@@ -52,7 +52,7 @@ images.zombMam.src = 'Image/mama.png';
 images.zombChild.src = 'Image/child.png';
 images.zombSH.src = 'Image/ZombiSH.png';
 
-let score = 0;
+let level = 1;
 
 const moneyCount = 500;
 const healthCount = 90;
@@ -86,6 +86,8 @@ images.nextLevel = new Image();
 images.maskImage = new Image();
 images.pizzaImage = new Image();
 images.antImage = new Image();
+images.winImage = new Image();
+images.loseImage = new Image();
 
 images.money.src = 'Image/money.png';
 images.health.src = 'Image/health.png';
@@ -99,6 +101,8 @@ images.nextLevel.src = 'Image/nextLevel.png';
 images.maskImage.src = 'Image/maskImage.jpg';
 images.pizzaImage.src = 'Image/pizzaImage.jpg';
 images.antImage.src = 'Image/antImage.jpg';
+images.winImage.src = 'Image/winImage.jpg';
+images.loseImage.src = 'Image/loseImage.png';
 images.fon2.src = 'Image/fon2.jpg';
 
 const healthPrice = 10;
@@ -347,35 +351,28 @@ class Mather extends Inficed {
 
 class ZombiSH extends Inficed {}
 
-const level1 = [
-  { addNewZomb: (x, y) => [new Inficed(x, y, images.zombi)], number: 1 },
-  { addNewZomb: (x, y) => [new Alcoholic(x, y, images.zombiAlc)], number: 0 },
-  { addNewZomb: (x, y) => [new Mather(x, y, images.zombMam)], number: 0 },
-  { addNewZomb: (x, y) => [new ZombiSH(x, y, images.zombSH),
+const addZombiFunctions = [
+  (x, y) => [new Inficed(x, y, images.zombi)],
+  (x, y) => [new Alcoholic(x, y, images.zombiAlc)],
+  (x, y) => [new Mather(x, y, images.zombMam)],
+  (x, y) => [new ZombiSH(x, y, images.zombSH),
     new ZombiSH(x + images.zombi.width, y, images.zombSH),
     new ZombiSH(
       x + images.zombi.width / 2,
       y - images.zombi.height, images.zombSH)
-  ],
-  number: 0 }];
+  ]
+];
 
-level1.count = 1;
+const level1 = [5, 0, 0, 0];
+const level2 = [5, 5, 0, 0];
+const level3 = [4, 3, 5, 0];
+const level4 = [5, 5, 3, 5];
 
-const level2 = [
-  { addNewZomb: (x, y) => [new Inficed(x, y, images.zombi)], number: 1 },
-  { addNewZomb: (x, y) => [new Alcoholic(x, y, images.zombiAlc)], number: 1 },
-  { addNewZomb: (x, y) => [new Mather(x, y, images.zombMam)], number: 1 },
-  { addNewZomb: (x, y) => [new ZombiSH(x, y, images.zombSH),
-    new ZombiSH(x + images.zombi.width, y, images.zombSH),
-    new ZombiSH(
-      x + images.zombi.width / 2,
-      y - images.zombi.height, images.zombSH)
-  ],
-  number: 1 }];
+const sumOfZombi = level => level.reduce((acc, cur) => acc + cur, 0);
 
-level2.count = 4;
+const levels = [level1, level2, level3, level4];
 
-const levels = [level1, level2];
+levels.map(level => level.count = sumOfZombi(level));
 
 class Bonus {
   constructor(x, y) {
@@ -559,13 +556,13 @@ function bonusUpdate() {
 }
 
 function addZombi() {
-  const numb = '' + randomInteger(0, 3);
+  const numb = randomInteger(0, 3);
   const zombX = randomInteger(30, canvas.width - 2 * images.zombi.width);
   const zombY = randomInteger(250, 400) * -1;
-  if (Player.level[numb].number) {
-    Player.level[numb].number--
+  if (Player.level[numb]) {
+    Player.level[numb]--;
     Player.level.count--;
-    return Player.level[numb].addNewZomb(zombX, zombY);
+    return addZombiFunctions[numb](zombX, zombY);
   }
 }
 
@@ -592,22 +589,15 @@ function draw() {
     canvas.width, canvas.height
   );
 
-  collisionDetection();
-
-  const deadZombi = false;
+  const isLosed = collisionDetection();
+  if (isLosed) {
+    return;
+  }
 
   bonusUpdate();
   zombiUpdate();
   weaponUpdate();
-  const deadEgg = eggUpdate();
-
-  if (deadZombi) {
-    zombies.shift();
-  }
-
-  if (deadEgg) {
-    eggs.shift();
-  }
+  eggUpdate();
 
   if (rightPressed && Player.x < canvas.width - Player.image.width) {
     Player.x += speedPlayer;
@@ -628,7 +618,7 @@ function draw() {
     Player.image.width, Player.image.height
   );
 
-  drawScore();
+  drawLevel();
   drawBulletPull();
   drawMoney();
   drawBombCount();
@@ -755,14 +745,12 @@ function collisionZombiWeapon(weapon) {
         } else if (zomb instanceof Children && zomb.mother.isDraw) {
           bul.isDraw = false;
           zomb.mother.isDraw = false;
-          score += 4;
           if (zomb.mother.hasBonus) {
             bonuses.push(new Bonus(zomb.x, zomb.y));
           }
         } else {
           bul.isDraw = false;
           zomb.isDraw = false;
-          score += 4;
           if (zomb.hasBonus) {
             bonuses.push(new Bonus(zomb.x, zomb.y));
           }
@@ -781,21 +769,41 @@ function collisionDetection() {
     const isEggInPlayer = isInObj(Player, egg.x, egg.y);
     if (egg.isDraw && isEggInPlayer) {
       if (Player.health <= 0) {
-        alert('Проигрыш!');
+        window.cancelAnimationFrame(ID);
+        ctx.drawImage(
+          images.loseImage, 0, 0,
+          images.loseImage.width, images.loseImage.height,
+          0, 0,
+          canvas.width, canvas.height
+        );
+        setTimeout(() => alert('Проигрыш! Ви инфицированы('), 0);
+        return true;
       } else {
         Player.health -= 10;
         eggs[i].isDraw = false;
       }
     }
   }
+  return false;
 }
 
 function stop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   window.cancelAnimationFrame(ID);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  updateShop();
-  drawShop();
+  if (levels[levels.indexOf(Player.level) + 1]) {
+    updateShop();
+    drawShop();
+  } else {
+    ctx.drawImage(
+      images.winImage, 0, 0,
+      images.winImage.width, images.winImage.height,
+      0, 0,
+      canvas.width, canvas.height
+    );
+    setTimeout(() => {
+      alert('Поздравляю! Вы спасли Землю! Ура, карантин наконец-то закончился');
+    }, 0);
+  }
 }
 
 function initLevel() {
@@ -810,7 +818,7 @@ function initLevel() {
   projector.maxCount = rects.increaseMasksVolume.parametr;
 
   for (let i = 0; i < gun.maxCount; i++) {
-    gun.ones.push(new Bullet(0, 0, images.bullet, i < gun.activeOnes))
+    gun.ones.push(new Bullet(0, 0, images.bullet, i < gun.activeOnes));
   }
 
   for (let i = 0; i < projector.maxCount; i++) {
@@ -820,6 +828,7 @@ function initLevel() {
 }
 
 function clearLevel() {
+  level++;
   gun.ones = [];
   projector.ones = [];
   zombies = [];
@@ -827,10 +836,10 @@ function clearLevel() {
   bonuses = [];
 }
 
-function drawScore() {
+function drawLevel() {
   ctx.font = '32px Arial';
-  ctx.fillStyle = 'black';
-  ctx.fillText(`Score: ${score}`, 8, 32);
+  ctx.fillStyle = 'red';
+  ctx.fillText(`Level: ${level}`, 8, 32);
 }
 
 function drawBulletPull() {
