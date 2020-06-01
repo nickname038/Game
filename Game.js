@@ -36,11 +36,9 @@ images.zombMam = new Image();
 images.zombChild = new Image();
 images.zombSH = new Image();
 
-const zombies = [];
-const bullets = [];
-const eggs = [];
-const bonuses = [];
-const bombs = [];
+let zombies = [];
+let eggs = [];
+let bonuses = [];
 
 images.egg.src = 'Image/egg1.png';
 images.bullet.src = 'Image/bullet1.png';
@@ -122,12 +120,13 @@ const paddingY = 60;
 const paddingX = 40;
 const imageSize = 125;
 
-const rects = [];
+const rects = {};
 const buttons = [];
 const topRow = [];
 const shopImages  = [];
 let lines = [];
 const prices = [];
+const rectsName = [];
 
 const coordinatesOfButtonY = [];
 const coordinatesOfButtonX = [];
@@ -150,6 +149,13 @@ shopImages.push(images.pizzaImage, images.antImage, images.maskImage);
 prices.push(
   healthPrice, healthVolumePrice, antisepticPrice,
   antisepticVolumePrice, maskPrice, maskVolumePrice
+);
+
+rectsName.push(
+  'buyPizza', 'increasePizzaVolume', 'buyAntiseptic',
+  'increaseAntisepticVolume', 'buyMasks', 'increaseMasksVolume',
+  'nextLevelButton', 'moneyObj', 'healthObj', 'antisepticObj',
+  'masksObj', 'pizzaImage', 'antImage', 'maskImage'
 );
 
 const rectLength = 250;
@@ -232,50 +238,51 @@ for (let i = 0; i < columnButtonNumber; i++) {
 }
 
 for (let i = 0; i < lineButtonNumber; i++) {
-  y = coordinatesOfButtonY[i];
+  const y = coordinatesOfButtonY[i];
   for (let j = 0; j < columnButtonNumber; j++) {
-    x = coordinatesOfButtonX[j];
-    rects.push(
-      new Buttons(x, y, buttons[rects.length],
-        lines[rects.length + 1], prices[rects.length])
-    );
+    const x = coordinatesOfButtonX[j];
+    const index = Object.keys(rects).length;
+    rects[rectsName[index]] = new Buttons(x, y, buttons[index],
+      lines[index + 1], prices[index]);
   }
 }
 
-rects.push(
-  new Buttons(canvas.width - rectLength - paddingX,
-    canvas.height - rectHeigth - paddingY, buttons[buttons.length - 1])
+rects[rectsName[Object.keys(rects).length]] = new Buttons(
+  canvas.width - rectLength - paddingX, canvas.height - rectHeigth - paddingY,
+  buttons[buttons.length - 1]
 );
 
-const nextLevelButton = rects[rects.length - 1];
-
-rects.push(new TopRow(paddingX, topRow[0], moneyCount));
-const moneyObj = rects[rects.length - 1];
+rects[rectsName[Object.keys(rects).length]] = new TopRow(
+  paddingX, topRow[0], moneyCount
+);
 
 for (let i = 1; i < topRow.length; i++) {
   const x = paddingX + (paddingX + rectLength) * i;
   const indexOfButton1 = (i - 1) * 2;
   const indexOfButton2 = indexOfButton1 + 1;
-  rects.push(
-    new TopRow(x, topRow[i], rects[indexOfButton1], rects[indexOfButton2])
+  const index = Object.keys(rects).length;
+  rects[rectsName[index]] = new TopRow(
+    x, topRow[i], rects[rectsName[indexOfButton1]],
+    rects[rectsName[indexOfButton2]]
   );
 }
 
 for (let i = 0, y = buttonY; i < shopImages.length; i++,
 y += imageSize + topRowY) {
-  rects.push(new Images(y, shopImages[i]));
+  const index = Object.keys(rects).length;
+  rects[rectsName[index]] = new Images(y, shopImages[i]);
 }
 
 let ID;
 
 const gun = {
-  ones: bullets,
+  ones: [],
   activeOnes: antisepticCount,
   maxCount: antisepticVolume,
 }
 
 const projector = {
-  ones: bombs,
+  ones: [],
   activeOnes: maskCount,
   maxCount: maskVolume,
 }
@@ -342,6 +349,20 @@ class ZombiSH extends Inficed {}
 
 const level1 = [
   { addNewZomb: (x, y) => [new Inficed(x, y, images.zombi)], number: 1 },
+  { addNewZomb: (x, y) => [new Alcoholic(x, y, images.zombiAlc)], number: 0 },
+  { addNewZomb: (x, y) => [new Mather(x, y, images.zombMam)], number: 0 },
+  { addNewZomb: (x, y) => [new ZombiSH(x, y, images.zombSH),
+    new ZombiSH(x + images.zombi.width, y, images.zombSH),
+    new ZombiSH(
+      x + images.zombi.width / 2,
+      y - images.zombi.height, images.zombSH)
+  ],
+  number: 0 }];
+
+level1.count = 1;
+
+const level2 = [
+  { addNewZomb: (x, y) => [new Inficed(x, y, images.zombi)], number: 1 },
   { addNewZomb: (x, y) => [new Alcoholic(x, y, images.zombiAlc)], number: 1 },
   { addNewZomb: (x, y) => [new Mather(x, y, images.zombMam)], number: 1 },
   { addNewZomb: (x, y) => [new ZombiSH(x, y, images.zombSH),
@@ -352,9 +373,9 @@ const level1 = [
   ],
   number: 1 }];
 
-level1.count = 4;
+level2.count = 4;
 
-const levels = [level1];
+const levels = [level1, level2];
 
 class Bonus {
   constructor(x, y) {
@@ -398,11 +419,11 @@ class Bullet extends Egg {
 class Bomb extends Bullet {}
 
 for (let i = 0; i < antisepticVolume; i++) {
-  bullets.push(new Bullet(0, 0, images.bullet, i < antisepticCount));
+  gun.ones.push(new Bullet(0, 0, images.bullet, i < antisepticCount));
 }
 
 for (let i = 0; i < maskVolume; i++) {
-  bombs.push(new Bomb(0, 0, images.bomb, i < maskCount));
+  projector.ones.push(new Bomb(0, 0, images.bomb, i < maskCount));
 }
 
 const Player = {
@@ -441,7 +462,7 @@ function drawShop() {
     canvas.width, canvas.height
   );
 
-  for (const rect of rects) {
+  for (const rect of Object.values(rects)) {
     rect.draw();
     if (rect instanceof TopRow) {
       rect.drawLine();
@@ -452,13 +473,13 @@ function drawShop() {
 function updateShop() {
   lines = [];
   lines.push(
-    Player.money, Player.health, Player.healthVolume, gun.activeOnes,
+    Player.health, Player.healthVolume, gun.activeOnes,
     gun.maxCount, projector.activeOnes, projector.maxCount
   );
 
-  moneyObj.parametr = lines[0];
   for (let i = 0; i < lines.length; i++) {
-    rects[i].parametr = lines[i + 1];
+    const name = rectsName[i];
+    rects[name].parametr = lines[i];
   }
 }
 
@@ -499,7 +520,7 @@ function chekZombi(zomb) {
 }
 
 function weaponUpdate() {
-  for (const bul of bullets) {
+  for (const bul of gun.ones) {
     if (bul.isDraw) {
       bul.update();
       ctx.drawImage(
@@ -511,7 +532,7 @@ function weaponUpdate() {
     }
   }
 
-  for (const bomb of bombs) {
+  for (const bomb of projector.ones) {
     if (bomb.isDraw) {
       bomb.update();
       ctx.drawImage(
@@ -690,19 +711,20 @@ function clickHandler() {
 }
 
 function clickButton() {
-  for (const rect of rects) {
+  for (const rect of Object.values(rects)) {
     const isCursorInObj = isInObj(rect, x, y);
     if (rect instanceof Buttons && isCursorInObj) {
-      if (moneyObj.parametr - rect.price >= 0 && rect.canIncrease) {
+      if (rects.moneyObj.parametr - rect.price >= 0 && rect.canIncrease) {
         rect.increase();
-        moneyObj.parametr -= rect.price;
+        rects.moneyObj.parametr -= rect.price;
         drawShop();
         break;
-      } else if (rect === nextLevelButton) {
+      } else if (rect === rects.nextLevelButton) {
         const index = levels.indexOf(Player.level) + 1;
         if (levels[index]) {
           Player.level = levels[index];
           Player.isInShop = false;
+          initLevel();
           draw();
         }
       }
@@ -728,7 +750,7 @@ function collisionZombiWeapon(weapon) {
     for (const zomb of zombies) {
       const isBulInZomb = isInObj(zomb, bul.x, bul.y);
       if (isBulInZomb && bul.isDraw && zomb.isDraw) {
-        if (weapon === bullets && zomb instanceof Alcoholic) {
+        if (Player.weapon === gun && zomb instanceof Alcoholic) {
           continue;
         } else if (zomb instanceof Children && zomb.mother.isDraw) {
           bul.isDraw = false;
@@ -752,8 +774,8 @@ function collisionZombiWeapon(weapon) {
 
 function collisionDetection() {
 
-  collisionZombiWeapon(bullets);
-  collisionZombiWeapon(bombs);
+  collisionZombiWeapon(gun.ones);
+  collisionZombiWeapon(projector.ones);
 
   for (const [i, egg] of eggs.entries()) {
     const isEggInPlayer = isInObj(Player, egg.x, egg.y);
@@ -774,6 +796,35 @@ function stop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateShop();
   drawShop();
+}
+
+function initLevel() {
+  clearLevel();
+  Player.money = rects.moneyObj.parametr;
+  Player.health = rects.buyPizza.parametr;
+  Player.healthVolume = rects.increasePizzaVolume.parametr;
+  gun.activeOnes = rects.buyAntiseptic.parametr;
+  gun.maxCount = rects.increaseAntisepticVolume.parametr;
+
+  projector.activeOnes = rects.buyMasks.parametr;
+  projector.maxCount = rects.increaseMasksVolume.parametr;
+
+  for (let i = 0; i < gun.maxCount; i++) {
+    gun.ones.push(new Bullet(0, 0, images.bullet, i < gun.activeOnes))
+  }
+
+  for (let i = 0; i < projector.maxCount; i++) {
+    projector.ones.push(new Bomb(0, 0, images.bomb, i < projector.activeOnes));
+  }
+
+}
+
+function clearLevel() {
+  gun.ones = [];
+  projector.ones = [];
+  zombies = [];
+  eggs = [];
+  bonuses = [];
 }
 
 function drawScore() {
@@ -806,5 +857,5 @@ function drawBombCount() {
 function drawHealth() {
   ctx.font = '32px Arial';
   ctx.fillStyle = 'black';
-  ctx.fillText(`Health: ${Player.health}/${healthVolume}`, 8, 152);
+  ctx.fillText(`Health: ${Player.health}/${Player.healthVolume}`, 8, 152);
 }
