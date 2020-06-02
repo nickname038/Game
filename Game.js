@@ -13,9 +13,6 @@ function resize() {
 resize();
 
 let x, y;
-let sX, sY, k, dx, dy;
-let sXZ, sYZ, K, dxEgg, dyEgg;
-const speedEgg = 4;
 
 window.onmousemove = function(event) {
   x = event.pageX;
@@ -69,6 +66,7 @@ const speedPlayer = 6;
 const speedZombi = 2;
 const speedBullet = 9;
 const speedAngryZombi = 5;
+const speedEgg = 4;
 
 const timeAttak = 4000;
 const angTimeAttak = 2000;
@@ -118,11 +116,15 @@ const topRowY = 40;
 const lineX = 165;
 const lineY = 60;
 const rectHeigth = 100;
+const rectLength = 250;
 const lineButtonNumber = 3;
 const columnButtonNumber = 2;
 const paddingY = 60;
 const paddingX = 40;
 const imageSize = 125;
+
+const buttonX = canvas.width / 3;
+const buttonY = canvas.height / 3;
 
 const rects = {};
 const buttons = [];
@@ -134,6 +136,8 @@ const rectsName = [];
 
 const coordinatesOfButtonY = [];
 const coordinatesOfButtonX = [];
+
+let ID;
 
 const keyCods = {
   enter: 13,
@@ -161,8 +165,6 @@ rectsName.push(
   'nextLevelButton', 'moneyObj', 'healthObj', 'antisepticObj',
   'masksObj', 'pizzaImage', 'antImage', 'maskImage'
 );
-
-const rectLength = 250;
 
 class Images {
   constructor(y, image) {
@@ -230,9 +232,6 @@ class Buttons extends Images {
   }
 }
 
-const buttonX = canvas.width / 3;
-const buttonY = canvas.height / 3;
-
 for (let i = 0; i < lineButtonNumber; i++) {
   coordinatesOfButtonY.push(buttonY + (rectHeigth + paddingY) * i);
 }
@@ -276,8 +275,6 @@ y += imageSize + topRowY) {
   const index = Object.keys(rects).length;
   rects[rectsName[index]] = new Images(y, shopImages[i]);
 }
-
-let ID;
 
 const gun = {
   ones: [],
@@ -349,23 +346,21 @@ class Mather extends Inficed {
   }
 }
 
-class ZombiSH extends Inficed {}
-
 const addZombiFunctions = [
   (x, y) => [new Inficed(x, y, images.zombi)],
   (x, y) => [new Alcoholic(x, y, images.zombiAlc)],
   (x, y) => [new Mather(x, y, images.zombMam)],
-  (x, y) => [new ZombiSH(x, y, images.zombSH),
-    new ZombiSH(x + images.zombi.width, y, images.zombSH),
-    new ZombiSH(
+  (x, y) => [new Inficed(x, y, images.zombSH),
+    new Inficed(x + images.zombi.width, y, images.zombSH),
+    new Inficed(
       x + images.zombi.width / 2,
       y - images.zombi.height, images.zombSH)
   ]
 ];
 
-const level1 = [5, 0, 0, 0];
-const level2 = [5, 5, 0, 0];
-const level3 = [4, 3, 5, 0];
+const level1 = [1, 0, 0, 0];
+const level2 = [1, 0, 0, 0];
+const level3 = [1, 0, 0, 0];
 const level4 = [5, 5, 3, 5];
 
 const sumOfZombi = level => level.reduce((acc, cur) => acc + cur, 0);
@@ -481,7 +476,7 @@ function updateShop() {
 }
 
 function zombiUpdate() {
-  if (randomInteger(0, 10000) > 9950) {
+  if (randomInteger(0, 10000) > 9900) {
     const newZombi = addZombi();
     if (newZombi) {
       zombies.push(...newZombi);
@@ -627,20 +622,30 @@ function draw() {
   ID = window.requestAnimationFrame(draw);
 }
 
+function determineDirection(x, y, obj, speed) {
+  const sX = x - obj.x;
+  const sY = y - obj.y;
+  const k = sX / sY;
+  let dy = Math.sqrt((speed ** 2) / (1 + (k ** 2)));
+  if (sY < 0) {
+    dy = -dy;
+  }
+  const dx = k * dy;
+  return [dx, dy];
+}
+
 function zombiAttak(zomb) {
 
   const timer1 = setInterval(() => {
     if (zomb.isDraw) {
       zomb.egg.isDraw = true;
-      sXZ = (Player.x + Player.image.width * 0.5) - zomb.x;
-      sYZ = Player.y - zomb.y;
-      K = sXZ / sYZ;
-      dyEgg = Math.sqrt((speedEgg ** 2) / (1 + (K ** 2)));
-      dxEgg = (K * dyEgg);
+      const [dx, dy] = determineDirection(
+        Player.x + Player.image.width * 0.5, Player.y, zomb, speedEgg
+      );
       zomb.egg.x = zomb.x;
       zomb.egg.y = zomb.y;
-      zomb.egg.dx = dxEgg;
-      zomb.egg.dy = dyEgg;
+      zomb.egg.dx = dx;
+      zomb.egg.dy = dy;
     } else {
       clearInterval(timer1)
     }
@@ -678,11 +683,7 @@ function clickHandler() {
   if (Player.isInShop) {
     clickButton();
   } else if (getBonus()) {
-    sX = x - Player.x - Player.image.width * 0.5;
-    sY = y - Player.y;
-    k = sX / sY;
-    dy = -Math.sqrt((speedBullet ** 2) / (1 + k ** 2));
-    dx = (k * dy);
+    const [dx, dy] = determineDirection(x, y, Player, speedBullet);
     if (Player.weapon.activeOnes) {
       Player.weapon.activeOnes--;
       for (const bul of Player.weapon.ones) {
