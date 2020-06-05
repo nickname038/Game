@@ -42,7 +42,7 @@ images.bullet.src = 'Image/bullet1.png';
 images.player.src = 'Image/prog.jpg';
 images.zombi.src = 'Image/zombi.png';
 images.flat.src = 'Image/k-18.jpg';
-images.bonus.src = 'Image/bonus.jpg';
+images.bonus.src = 'Image/bonus.png';
 images.zombiAlc.src = 'Image/zombiAlc.png';
 images.bomb.src = 'Image/bomb.png';
 images.zombMam.src = 'Image/mama.png';
@@ -358,9 +358,9 @@ const addZombiFunctions = [
   ]
 ];
 
-const level1 = [1, 0, 0, 0];
-const level2 = [1, 0, 0, 0];
-const level3 = [1, 0, 0, 0];
+const level1 = [5, 0, 0, 0];
+const level2 = [5, 5, 0, 0];
+const level3 = [3, 3, 5, 0];
 const level4 = [5, 5, 3, 5];
 
 const sumOfZombi = level => level.reduce((acc, cur) => acc + cur, 0);
